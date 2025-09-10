@@ -66,7 +66,12 @@ function Particles() {
   useEffect(() => {
     const canvas = document.getElementById("particles");
     if (!(canvas instanceof HTMLCanvasElement)) return;
-    const ctx = canvas.getContext("2d");
+    let ctx = null;
+    try {
+      ctx = canvas.getContext("2d");
+    } catch {
+      return; // canvas not supported (e.g., in tests)
+    }
     if (!ctx) return;
 
     let raf = 0;
@@ -472,6 +477,10 @@ function LeaderboardsPage() {
   const [rows, setRows] = React.useState(FALLBACK);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
+  const [historyOpen, setHistoryOpen] = React.useState(false);
+  const [historyRows, setHistoryRows] = React.useState([]);
+  const [historyRange, setHistoryRange] = React.useState({ start: "", end: "" });
+  const [historyLoading, setHistoryLoading] = React.useState(false);
 
   // --- 3) NEW prize mapping (1–6) ---
   const prizeByRank = React.useMemo(() => ({
@@ -486,6 +495,7 @@ function LeaderboardsPage() {
   }), []);
 
   const API_URL = "https://lucky-w.vercel.app/api/leaderboard/top"; // <-- your working endpoint
+  const HISTORY_URL = "/api/leaderboard/previous";
   console.log("Leaderboard API_URL:", API_URL); // leave this for debugging
 
   // --- 4) Feature toggle: keep fallback while you test ---
@@ -526,6 +536,38 @@ function LeaderboardsPage() {
     return () => { alive = false; };
   }, [API_URL, prizeByRank, forceMock, FALLBACK]);
 
+  const fetchHistory = React.useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const r = await fetch(HISTORY_URL, { headers: { "Accept": "application/json" } });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+      const items = (j.items ?? []).map((x) => ({
+        rank: x.rank,
+        name: x.username,
+        wagered: Number(x.wagered || 0),
+        prize: prizeByRank[x.rank] ?? 0,
+      }));
+      setHistoryRows(items);
+      setHistoryRange({ start: j.period_start, end: j.period_end });
+    } catch (e) {
+      console.error(e);
+      setHistoryRows([]);
+      setHistoryRange({ start: "", end: "" });
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [HISTORY_URL, prizeByRank]);
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    if (!historyRows.length && !historyLoading) {
+      fetchHistory();
+    }
+  };
+
+  const closeHistory = () => setHistoryOpen(false);
+
   // --- 5) Normalize prizes AGAIN at render-time (so fallback never leaks old values) ---
   const viewRows = React.useMemo(
     () => rows.map(r => ({ ...r, prize: prizeByRank[r.rank] ?? 0 })),
@@ -540,26 +582,26 @@ function LeaderboardsPage() {
   return (
     <section className="relative z-20 py-16 px-6">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
         {error && (
-          <div className="mb-4 text-sm text-yellow-300 opacity-80">
-            {error}
-          </div>
+          <div className="mb-4 text-sm text-yellow-300 opacity-80">{error}</div>
         )}
-
         {loading ? (
           <div className="text-white/70">Loading leaderboard…</div>
         ) : (
           <>
-            {/* Title stays up top, but countdown MOVES under podiums */}
-            <header className="mb-6 text-center">
+            <header className="mb-6 flex items-center justify-center gap-4">
               <h1 className="text-3xl md:text-4xl font-extrabold" style={{ color: KICK_GREEN }}>
                 Monthly Leaderboard
               </h1>
+              <button
+                onClick={openHistory}
+                className="text-xs px-3 py-1 rounded border"
+                style={{ borderColor: KICK_GREEN, color: KICK_GREEN }}
+              >
+                History
+              </button>
             </header>
 
-
-            {/* Podium (exact 2 / 1 / 3 layout preserved) */}
             <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-4">
               {top3[1] && (
                 <PodiumCard
@@ -599,7 +641,6 @@ function LeaderboardsPage() {
               )}
             </div>
 
-            {/* Countdown UNDERNEATH the podiums (boxy, consistent) */}
             <div className="mb-8">
               <div className="flex items-center justify-center gap-4">
                 {[
@@ -625,7 +666,6 @@ function LeaderboardsPage() {
               </div>
             </div>
 
-            {/* Ranks 4–15 (now includes Prize column to match actual design) */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
               <div className="grid grid-cols-12 text-[11px] uppercase tracking-wider text-gray-400 px-3 py-2">
                 <div className="col-span-2">Rank</div>
@@ -652,6 +692,21 @@ function LeaderboardsPage() {
           </>
         )}
       </div>
+
+      {historyOpen && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+          <div className="relative w-full max-w-md mx-4">
+            <button
+              onClick={closeHistory}
+              className="absolute top-2 right-2 text-xs px-2 py-1 rounded border"
+              style={{ borderColor: KICK_GREEN, color: KICK_GREEN }}
+            >
+              Close
+            </button>
+            <HistoryTable rows={historyRows} range={historyRange} loading={historyLoading} />
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -717,6 +772,49 @@ function TimeTile({ label, value }) {
       <div className="text-[10px] uppercase tracking-wider text-gray-400 mt-1">{label}</div>
     </div>
   );
+}
+
+function HistoryTable({ rows, range, loading }) {
+  if (loading) {
+    return <div className="text-white/70 mb-8">Loading history…</div>;
+  }
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden mb-8">
+      <div className="grid grid-cols-12 text-[11px] uppercase tracking-wider text-gray-400 px-3 py-2">
+        <div className="col-span-2">Rank</div>
+        <div className="col-span-5">Player</div>
+        <div className="col-span-3">Wagered</div>
+        <div className="col-span-2 text-right">Prize</div>
+      </div>
+      <div className="divide-y divide-white/5">
+        {rows.map((r) => (
+          <div key={r.rank} className="grid grid-cols-12 items-center px-3 py-3 hover:bg-white/[0.02]">
+            <div className="col-span-2 font-black text-white">#{r.rank}</div>
+            <div className="col-span-5">{r.name}</div>
+            <div className="col-span-3 text-gray-300">{formatMoney(r.wagered)}</div>
+            <div className="col-span-2 text-right font-semibold" style={{ color: KICK_GREEN }}>
+              {formatMoney(r.prize)}
+            </div>
+          </div>
+        ))}
+        {rows.length === 0 && (
+          <div className="px-3 py-6 text-sm text-gray-400">No history available.</div>
+        )}
+      </div>
+      {range.start && range.end && (
+        <div className="px-3 py-2 text-center text-xs text-gray-400">
+          {formatPeriod(range.start, range.end)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatPeriod(start, end) {
+  const s = new Date(start);
+  const e = new Date(end);
+  const opts = { month: 'short', day: 'numeric' };
+  return `${s.toLocaleDateString('en-US', opts)} – ${e.toLocaleDateString('en-US', opts)}`;
 }
 
 function BadgeCard({ icon, title, desc }) {
