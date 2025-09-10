@@ -552,14 +552,12 @@ function LeaderboardsPage() {
         ) : (
           <>
             {/* Title stays up top, but countdown MOVES under podiums */}
-            <header className="mb-6">
+            <header className="mb-6 text-center">
               <h1 className="text-3xl md:text-4xl font-extrabold" style={{ color: KICK_GREEN }}>
                 Monthly Leaderboard
               </h1>
-              <p className="text-gray-300 mt-1">
-                Updates automatically. Prizes for Top&nbsp;6.
-              </p>
             </header>
+
 
             {/* Podium (exact 2 / 1 / 3 layout preserved) */}
             <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-4">
