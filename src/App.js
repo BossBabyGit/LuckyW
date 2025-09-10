@@ -446,20 +446,19 @@ function BonusesPage() {
 }
 
 function LeaderboardsPage() {
-  
-  // --- 1) Hardcoded fallback (what you already had) ---
+  // --- 1) Hardcoded fallback (kept simple; prize = 0 so mapping is the source of truth) ---
   const FALLBACK = React.useMemo(
     () => ([
-      { rank: 1, name: "BossBaby", wagered: 342130.32, prize: 1000 },
-      { rank: 2, name: "BossBaby", wagered: 298220.18, prize: 500 },
-      { rank: 3, name: "BossBaby", wagered: 251980.55, prize: 250 },
-      { rank: 4, name: "BossBaby", wagered: 203140.0,  prize: 150 },
-      { rank: 5, name: "BossBaby", wagered: 181120.45, prize: 100 },
-      { rank: 6, name: "BossBaby", wagered: 166780.12, prize: 75 },
-      { rank: 7, name: "BossBaby", wagered: 154210.0,  prize: 50 },
-      { rank: 8, name: "BossBaby", wagered: 141033.47, prize: 40 },
-      { rank: 9, name: "BossBaby", wagered: 132440.87, prize: 30 },
-      { rank: 10, name: "BossBaby", wagered: 120008.03, prize: 20 },
+      { rank: 1,  name: "BossBaby", wagered: 342130.32, prize: 0 },
+      { rank: 2,  name: "BossBaby", wagered: 298220.18, prize: 0 },
+      { rank: 3,  name: "BossBaby", wagered: 251980.55, prize: 0 },
+      { rank: 4,  name: "BossBaby", wagered: 203140.00, prize: 0 },
+      { rank: 5,  name: "BossBaby", wagered: 181120.45, prize: 0 },
+      { rank: 6,  name: "BossBaby", wagered: 166780.12, prize: 0 },
+      { rank: 7,  name: "BossBaby", wagered: 154210.00, prize: 0 },
+      { rank: 8,  name: "BossBaby", wagered: 141033.47, prize: 0 },
+      { rank: 9,  name: "BossBaby", wagered: 132440.87, prize: 0 },
+      { rank: 10, name: "BossBaby", wagered: 120008.03, prize: 0 },
       { rank: 11, name: "BossBaby", wagered: 110000.00, prize: 0 },
       { rank: 12, name: "BossBaby", wagered: 100000.00, prize: 0 },
       { rank: 13, name: "BossBaby", wagered:  90000.00, prize: 0 },
@@ -474,19 +473,22 @@ function LeaderboardsPage() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
 
-  // --- 3) Prize mapping (adjust as you need) ---
+  // --- 3) NEW prize mapping (1–6) ---
   const prizeByRank = React.useMemo(() => ({
-    1: 1000, 2: 500, 3: 250, 4: 150, 5: 100,
-    6: 75, 7: 50, 8: 40, 9: 30, 10: 20,
-    11: 0, 12: 0, 13: 0, 14: 0, 15: 0
+    1: 175,
+    2: 125,
+    3: 100,
+    4: 80,
+    5: 65,
+    6: 55,
+    7: 0,  8: 0,  9: 0,  10: 0,
+    11: 0, 12: 0, 13: 0, 14: 0, 15: 0,
   }), []);
-const API_URL = "https://lucky-w.vercel.app/api/leaderboard/top"; // <-- your working endpoint
 
-console.log("Leaderboard API_URL:", API_URL); // leave this for debugging
+  const API_URL = "https://lucky-w.vercel.app/api/leaderboard/top"; // <-- your working endpoint
+  console.log("Leaderboard API_URL:", API_URL); // leave this for debugging
 
-
-  // --- 5) Feature toggle: keep fallback while you test ---
-  // Add #mock to the URL (your hash router) to force fallback.
+  // --- 4) Feature toggle: keep fallback while you test ---
   const forceMock = (typeof window !== "undefined") && window.location.hash.includes("mock");
 
   React.useEffect(() => {
@@ -504,12 +506,12 @@ console.log("Leaderboard API_URL:", API_URL); // leave this for debugging
           rank: x.rank,
           name: x.username,
           wagered: Number(x.wagered || 0),
+          // DO NOT trust API prize — always map from our ladder:
           prize: prizeByRank[x.rank] ?? 0,
         }));
 
         if (!alive) return;
 
-        // If the API returns nothing yet, keep FALLBACK so the page doesn’t look empty
         setRows(items.length ? items : FALLBACK);
         setError(items.length ? "" : "No live data yet – showing sample data.");
       } catch (e) {
@@ -524,115 +526,138 @@ console.log("Leaderboard API_URL:", API_URL); // leave this for debugging
     return () => { alive = false; };
   }, [API_URL, prizeByRank, forceMock, FALLBACK]);
 
-  // --- 6) Your existing layout logic still works ---
-  const top3  = rows.slice(0, 3);
-  const rest  = rows.slice(3, 15); // or 3..15 if your UI shows all 15
-  const { days, hours, minutes, seconds } = useMonthEndCountdown();
+  // --- 5) Normalize prizes AGAIN at render-time (so fallback never leaks old values) ---
+  const viewRows = React.useMemo(
+    () => rows.map(r => ({ ...r, prize: prizeByRank[r.rank] ?? 0 })),
+    [rows, prizeByRank]
+  );
+
+  // --- 6) Layout slices + countdown values ---
+  const top3 = viewRows.slice(0, 3);      // [1st, 2nd, 3rd]
+  const rest = viewRows.slice(3, 15);     // 4..15
+  const { days, hours, minutes, seconds } = useMonthEndCountdown(); // you already have this hook
 
   return (
     <section className="relative z-20 py-16 px-6">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        {/* (keep your original header/content below) */}
         {error && (
           <div className="mb-4 text-sm text-yellow-300 opacity-80">
             {error}
           </div>
         )}
 
-        {/* Example: show a tiny loading state */}
         {loading ? (
           <div className="text-white/70">Loading leaderboard…</div>
         ) : (
-<>
-  {/* Heading */}
-  <header className="mb-6">
-    <h1 className="text-3xl md:text-4xl font-extrabold" style={{ color: KICK_GREEN }}>
-      Monthly Leaderboard
-    </h1>
-    <p className="text-gray-300 mt-1">
-      Updates automatically. Race ends in&nbsp;
-      <span className="font-semibold" style={{ color: KICK_GREEN }}>
-        {days}d {hours}h {minutes}m {seconds}s
-      </span>
-      .
-    </p>
-  </header>
+          <>
+            {/* Title stays up top, but countdown MOVES under podiums */}
+            <header className="mb-6">
+              <h1 className="text-3xl md:text-4xl font-extrabold" style={{ color: KICK_GREEN }}>
+                Monthly Leaderboard
+              </h1>
+              <p className="text-gray-300 mt-1">
+                Updates automatically. Prizes for Top&nbsp;6.
+              </p>
+            </header>
 
-  <div className="mb-3 text-xs text-gray-400">
-  <div>API: {API_URL}</div>
-  <div>Status: {loading ? "loading…" : error ? `error: ${error}` : "ok"}</div>
-  <div>Rows: {String(rows?.length ?? 0)}</div>
-  </div>
+            {/* Podium (exact 2 / 1 / 3 layout preserved) */}
+            <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-4">
+              {top3[1] && (
+                <PodiumCard
+                  placement={2}
+                  item={top3[1]}
+                  className=""
+                  height="h-[220px]"
+                  tint="rgba(0, 255, 255, 0.10)"
+                  edgeColor="#22d3ee"
+                  badge={<MedalRibbon n={2} color="#22d3ee" />}
+                  highlight={false}
+                />
+              )}
+              {top3[0] && (
+                <PodiumCard
+                  placement={1}
+                  item={top3[0]}
+                  className=""
+                  height="h-[260px]"
+                  tint="rgba(0,231,1,0.12)"
+                  edgeColor={KICK_GREEN}
+                  badge={<Crown size={18} color={KICK_GREEN} />}
+                  highlight
+                />
+              )}
+              {top3[2] && (
+                <PodiumCard
+                  placement={3}
+                  item={top3[2]}
+                  className=""
+                  height="h-[200px]"
+                  tint="rgba(250,204,21,0.10)"
+                  edgeColor="#facc15"
+                  badge={<MedalRibbon n={3} color="#facc15" />}
+                  highlight={false}
+                />
+              )}
+            </div>
 
+            {/* Countdown UNDERNEATH the podiums (boxy, consistent) */}
+            <div className="mb-8">
+              <div className="flex items-center justify-center gap-4">
+                {[
+                  { label: "Days", value: days },
+                  { label: "Hours", value: hours },
+                  { label: "Minutes", value: minutes },
+                  { label: "Seconds", value: seconds },
+                ].map((b) => (
+                  <div key={b.label} className="flex flex-col items-center">
+                    <div className="rounded-xl px-4 py-3 border border-white/10 bg-white/[0.03] min-w-[72px] text-center">
+                      <div className="text-2xl font-black tracking-tight text-white">
+                        {String(b.value).padStart(2, "0")}
+                      </div>
+                    </div>
+                    <div className="mt-1 text-[11px] uppercase tracking-wider text-gray-400">
+                      {b.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 text-center text-gray-400 text-sm">
+                Resets at 00:00 on the 1st
+              </div>
+            </div>
 
-  {/* Podium (Top 3) */}
-  <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-8">
-    {top3[1] && (
-      <PodiumCard
-        placement={2}
-        item={top3[1]}
-        className=""
-        height="h-[220px]"
-        tint="rgba(0, 255, 255, 0.10)"
-        edgeColor="#22d3ee"
-        badge={<MedalRibbon n={2} color="#22d3ee" />}
-        highlight={false}
-      />
-    )}
-    {top3[0] && (
-      <PodiumCard
-        placement={1}
-        item={top3[0]}
-        className=""
-        height="h-[260px]"
-        tint="rgba(0,231,1,0.12)"
-        edgeColor={KICK_GREEN}
-        badge={<Crown size={18} color={KICK_GREEN} />}
-        highlight
-      />
-    )}
-    {top3[2] && (
-      <PodiumCard
-        placement={3}
-        item={top3[2]}
-        className=""
-        height="h-[200px]"
-        tint="rgba(250,204,21,0.10)"
-        edgeColor="#facc15"
-        badge={<MedalRibbon n={3} color="#facc15" />}
-        highlight={false}
-      />
-    )}
-  </div>
-
-  {/* Ranks 4–15 */}
-  <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
-    <div className="grid grid-cols-12 text-[11px] uppercase tracking-wider text-gray-400 px-3 py-2">
-      <div className="col-span-2">Rank</div>
-      <div className="col-span-6">Player</div>
-      <div className="col-span-4 text-right">Wagered</div>
-    </div>
-    <div className="divide-y divide-white/5">
-      {rows.slice(3, 15).map((r) => (
-        <div key={r.rank} className="grid grid-cols-12 items-center px-3 py-3">
-          <div className="col-span-2 font-black" style={{ color: "white" }}>#{r.rank}</div>
-          <div className="col-span-6">{r.name}</div>
-          <div className="col-span-4 text-right font-semibold text-gray-200">{formatMoney(r.wagered)}</div>
-        </div>
-      ))}
-      {rows.length <= 3 && (
-        <div className="px-3 py-6 text-sm text-gray-400">No more players yet.</div>
-      )}
-    </div>
-  </div>
-</>
-
+            {/* Ranks 4–15 (now includes Prize column to match actual design) */}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
+              <div className="grid grid-cols-12 text-[11px] uppercase tracking-wider text-gray-400 px-3 py-2">
+                <div className="col-span-2">Rank</div>
+                <div className="col-span-5">Player</div>
+                <div className="col-span-3">Wagered</div>
+                <div className="col-span-2 text-right">Prize</div>
+              </div>
+              <div className="divide-y divide-white/5">
+                {rest.map((r) => (
+                  <div key={r.rank} className="grid grid-cols-12 items-center px-3 py-3 hover:bg-white/[0.02]">
+                    <div className="col-span-2 font-black text-white">#{r.rank}</div>
+                    <div className="col-span-5">{r.name}</div>
+                    <div className="col-span-3 text-gray-300">{formatMoney(r.wagered)}</div>
+                    <div className="col-span-2 text-right font-semibold" style={{ color: KICK_GREEN }}>
+                      {formatMoney(r.prize)}
+                    </div>
+                  </div>
+                ))}
+                {rest.length === 0 && (
+                  <div className="px-3 py-6 text-sm text-gray-400">No more players yet.</div>
+                )}
+              </div>
+            </div>
+          </>
         )}
       </div>
     </section>
   );
 }
+
 
 
 function PodiumCard({ placement, item, className, height, tint, edgeColor, badge, highlight }) {
