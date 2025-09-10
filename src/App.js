@@ -446,6 +446,7 @@ function BonusesPage() {
 }
 
 function LeaderboardsPage() {
+  
   // --- 1) Hardcoded fallback (what you already had) ---
   const FALLBACK = React.useMemo(
     () => ([
@@ -479,9 +480,9 @@ function LeaderboardsPage() {
     6: 75, 7: 50, 8: 40, 9: 30, 10: 20,
     11: 0, 12: 0, 13: 0, 14: 0, 15: 0
   }), []);
+const API_URL = "https://lucky-w.vercel.app/api/leaderboard/top"; // <-- your working endpoint
 
-const API_BASE = "https://lucky-w.vercel.app"; // no trailing slash
-const API_URL = `${API_BASE}/api/leaderboard/top`;
+console.log("Leaderboard API_URL:", API_URL); // leave this for debugging
 
 
   // --- 5) Feature toggle: keep fallback while you test ---
@@ -557,6 +558,13 @@ const API_URL = `${API_BASE}/api/leaderboard/top`;
       .
     </p>
   </header>
+
+  <div className="mb-3 text-xs text-gray-400">
+  <div>API: {API_URL}</div>
+  <div>Status: {loading ? "loading…" : error ? `error: ${error}` : "ok"}</div>
+  <div>Rows: {String(rows?.length ?? 0)}</div>
+  </div>
+
 
   {/* Podium (Top 3) */}
   <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-8">
