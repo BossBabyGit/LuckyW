@@ -1,0 +1,206 @@
+/* Dark Theme Base */
+.dark-app {
+  min-height: 100vh;
+  background: #121212;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1000px;
+}
+
+/* 3D Scene Container */
+.scene-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.scene {
+  width: 400px;
+  height: 400px;
+  perspective: 1200px;
+}
+
+/* Rotating Circle */
+@keyframes spin {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+.circle {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: spin 30s infinite linear;
+}
+
+/* Profile Container */
+.profile-container {
+  position: absolute;
+  width: 180px;
+  height: 240px;
+  left: 50%;
+  top: 50%;
+  margin-left: -90px;
+  margin-top: -120px;
+  transform-style: preserve-3d;
+  transition: all 0.5s ease;
+}
+
+.profile-container:hover {
+  transform: translateZ(50px) scale(1.1) !important;
+}
+
+/* 3D Profile Card */
+.profile-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: rotateX(5deg) rotateY(5deg);
+  box-shadow: 0 10px 30px rgba(0, 150, 255, 0.2);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+}
+
+.card-front {
+  background: linear-gradient(145deg, #1e1e1e 0%, #2a2a2a 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  transform: translateZ(10px);
+  border: 1px solid #333;
+}
+
+.card-back {
+  background: linear-gradient(145deg, #151515 0%, #1f1f1f 100%);
+  transform: rotateY(180deg) translateZ(10px);
+  border: 1px solid #444;
+}
+
+.card-top {
+  background: #252525;
+  height: 20px;
+  transform: rotateX(90deg) translateZ(10px) translateY(-10px);
+}
+
+.card-bottom {
+  background: #252525;
+  height: 20px;
+  transform: rotateX(-90deg) translateZ(230px) translateY(10px);
+}
+
+.card-left {
+  background: #202020;
+  width: 20px;
+  transform: rotateY(-90deg) translateZ(10px) translateX(-10px);
+}
+
+.card-right {
+  background: #202020;
+  width: 20px;
+  transform: rotateY(90deg) translateZ(170px) translateX(10px);
+}
+
+/* Card Content */
+.image-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+  z-index: 1;
+  transform: translateZ(20px);
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #0096ff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 2;
+}
+
+.glow-effect {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  background: radial-gradient(circle, rgba(0,150,255,0.4) 0%, rgba(0,150,255,0) 70%);
+  border-radius: 50%;
+  z-index: 1;
+  animation: pulse 2s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.5; transform: scale(0.95); }
+  to { opacity: 0.8; transform: scale(1.05); }
+}
+
+.profile-info {
+  text-align: center;
+  width: 100%;
+  transform: translateZ(15px);
+}
+
+.profile-info h3 {
+  margin: 0.5rem 0;
+  color: #ffffff;
+  font-size: 1.2rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.profile-info p {
+  margin: 0.3rem 0;
+  color: #00ffaa;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Hover Effects */
+.profile-container:hover .profile-card {
+  transform: rotateX(0deg) rotateY(0deg) translateZ(30px);
+  box-shadow: 0 15px 40px rgba(0, 150, 255, 0.4);
+}
+
+.profile-container:hover .card-front {
+  border-color: #00ffaa;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .scene {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .profile-container {
+    width: 140px;
+    height: 200px;
+    margin-left: -70px;
+    margin-top: -100px;
+  }
+  
+  .image-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+}
