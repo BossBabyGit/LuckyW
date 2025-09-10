@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ensureSchema, upsertEntry } from '../../lib/db';
 function currentMonthRange() {
   // Anchor start of cycle (adjust if needed):
-  const anchorStartUTC = Date.UTC(2025, 8, 26, 0, 0, 0); // Aug 26, 2025 (month is 0-based)
+  const anchorStartUTC = Date.UTC(2025, 8, 29, 0, 0, 0); // Aug 26, 2025 (month is 0-based)
   const PERIOD_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 
   const now = new Date();
