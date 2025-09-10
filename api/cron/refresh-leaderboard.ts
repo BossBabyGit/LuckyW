@@ -1,14 +1,31 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ensureSchema, upsertEntry } from '../../lib/db';
-
 function currentMonthRange() {
-  const start = new Date(Date.UTC(2025, 8, 26, 0, 0, 0)); // Aug 1, 2025
-  const end   = new Date(Date.UTC(2025, 9, 9, 0, 0, 0)); // Sep 1, 2025
+  // Anchor start of cycle (adjust if needed):
+  const anchorStartUTC = Date.UTC(2025, 7, 26, 0, 0, 0); // Aug 26, 2025 (month is 0-based)
+  const PERIOD_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+
+  const now = new Date();
+  // Use *midnight UTC* to avoid timezone drift
+  const nowMidnightUTC = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    0, 0, 0
+  );
+
+  // Which 14-day bucket are we in?
+  const k = Math.floor((nowMidnightUTC - anchorStartUTC) / PERIOD_MS);
+
+  const startMs = anchorStartUTC + k * PERIOD_MS;     // inclusive
+  const endMs   = startMs + PERIOD_MS;                // exclusive ("until")
+
+  const start = new Date(startMs);
+  const end   = new Date(endMs);
 
   console.log("Fetching stats between:", start.toISOString(), "and", end.toISOString());
   return { startISO: start.toISOString(), endISO: end.toISOString() };
 }
-
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') return res.status(405).end();
