@@ -85,7 +85,7 @@ export default function LeaderboardPage() {
               {rest.map((r) => (
                 <div key={r.rank} className="grid grid-cols-12 px-5 py-3 items-center hover:bg-white/[0.02]">
                   <div className="col-span-2 font-bold text-gray-200">#{r.rank}</div>
-                  <div className="col-span-5 font-medium">{r.name}</div>
+                  <div className="col-span-5 font-medium">{maskName(r.name)}</div>
                   <div className="col-span-3 text-gray-300">{formatMoney(r.wagered)}</div>
                   <div className="col-span-2 text-right font-semibold" style={{color:KICK_GREEN}}>{formatMoney(r.prize)}</div>
                 </div>
@@ -187,7 +187,7 @@ function PodiumCard({ placement, item, className, height, tint, edgeColor, badge
         <div className="flex items-end justify-between">
           <div>
             <div className="text-5xl font-black" style={{ color: highlight ? KICK_GREEN : "white" }}>#{item.rank}</div>
-            <div className="text-lg font-semibold">{item.name}</div>
+            <div className="text-lg font-semibold">{maskName(item.name)}</div>
           </div>
           <div className="text-right">
             <div className="text-xs text-gray-400">Wagered</div>
@@ -252,6 +252,13 @@ function useMonthEndCountdown(){
 }
 
 // ——— Utils ———
+function maskName(name){
+  if(!name) return "";
+  const visible = name.slice(0,2);
+  const hidden = "*".repeat(Math.max(name.length - 2, 0));
+  return visible + hidden;
+}
+
 function formatMoney(n){
   const isIntPrize = Number.isInteger(n);
   const value = isIntPrize ? n : Math.round(n*100)/100;

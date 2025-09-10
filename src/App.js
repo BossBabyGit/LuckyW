@@ -677,7 +677,7 @@ function LeaderboardsPage() {
                 {rest.map((r) => (
                   <div key={r.rank} className="grid grid-cols-12 items-center px-3 py-3 hover:bg-white/[0.02]">
                     <div className="col-span-2 font-black text-white">#{r.rank}</div>
-                    <div className="col-span-5">{r.name}</div>
+                    <div className="col-span-5">{maskName(r.name)}</div>
                     <div className="col-span-3 text-gray-300">{formatMoney(r.wagered)}</div>
                     <div className="col-span-2 text-right font-semibold" style={{ color: KICK_GREEN }}>
                       {formatMoney(r.prize)}
@@ -736,7 +736,7 @@ function PodiumCard({ placement, item, className, height, tint, edgeColor, badge
         <div className="flex items-end justify-between">
           <div>
             <div className="text-5xl font-black" style={{ color: highlight ? KICK_GREEN : "white" }}>#{item.rank}</div>
-            <div className="text-lg font-semibold">{item.name}</div>
+            <div className="text-lg font-semibold">{maskName(item.name)}</div>
           </div>
           <div className="text-right">
             <div className="text-xs text-gray-400">Wagered</div>
@@ -784,7 +784,7 @@ function HistoryTable({ rows, range, loading }) {
         {rows.map((r) => (
           <div key={r.rank} className="grid grid-cols-12 items-center px-3 py-3 hover:bg-white/[0.02]">
             <div className="col-span-2 font-black text-white">#{r.rank}</div>
-            <div className="col-span-5">{r.name}</div>
+            <div className="col-span-5">{maskName(r.name)}</div>
             <div className="col-span-3 text-gray-300">{formatMoney(r.wagered)}</div>
             <div className="col-span-2 text-right font-semibold" style={{ color: KICK_GREEN }}>
               {formatMoney(r.prize)}
@@ -858,6 +858,14 @@ function useMonthEndCountdown() {
   return { days: d, hours: h, minutes: m, seconds: s };
 }
 
+// Obfuscate a username so only first two characters are visible
+function maskName(name) {
+  if (!name) return "";
+  const visible = name.slice(0, 2);
+  const hidden = "*".repeat(Math.max(name.length - 2, 0));
+  return visible + hidden;
+}
+
 function formatMoney(n) {
   const isIntPrize = Number.isInteger(n);
   const value = isIntPrize ? n : Math.round(n * 100) / 100;
@@ -897,7 +905,7 @@ function LeaderboardPreview() {
         {rows.map((r) => (
           <div key={r.rank} className="grid grid-cols-12 items-center px-3 py-3">
             <div className="col-span-2 font-black" style={{ color: r.rank <= 3 ? KICK_GREEN : "white" }}>#{r.rank}</div>
-            <div className="col-span-5">{r.user}</div>
+            <div className="col-span-5">{maskName(r.user)}</div>
             <div className="col-span-3 text-gray-300">{r.points.toLocaleString()}</div>
             <div className="col-span-2 text-right font-semibold">{r.prize}</div>
           </div>
