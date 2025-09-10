@@ -527,7 +527,7 @@ function LeaderboardsPage() {
 
   // --- 6) Your existing layout logic still works ---
   const top3  = rows.slice(0, 3);
-  const rest  = rows.slice(3, 10); // or 3..15 if your UI shows all 15
+  const rest  = rows.slice(3, 15); // or 3..15 if your UI shows all 15
   const { days, hours, minutes, seconds } = useMonthEndCountdown();
 
   return (
@@ -545,10 +545,83 @@ function LeaderboardsPage() {
         {loading ? (
           <div className="text-white/70">Loading leaderboard…</div>
         ) : (
-          <>
-            {/* Use `top3` and `rest` exactly as before */}
-            {/* ...the rest of your existing JSX for the leaderboard table/cards... */}
-          </>
+<>
+  {/* Heading */}
+  <header className="mb-6">
+    <h1 className="text-3xl md:text-4xl font-extrabold" style={{ color: KICK_GREEN }}>
+      Monthly Leaderboard
+    </h1>
+    <p className="text-gray-300 mt-1">
+      Updates automatically. Race ends in&nbsp;
+      <span className="font-semibold" style={{ color: KICK_GREEN }}>
+        {days}d {hours}h {minutes}m {seconds}s
+      </span>
+      .
+    </p>
+  </header>
+
+  {/* Podium (Top 3) */}
+  <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-8">
+    {top3[1] && (
+      <PodiumCard
+        placement={2}
+        item={top3[1]}
+        className=""
+        height="h-[220px]"
+        tint="rgba(0, 255, 255, 0.10)"
+        edgeColor="#22d3ee"
+        badge={<MedalRibbon n={2} color="#22d3ee" />}
+        highlight={false}
+      />
+    )}
+    {top3[0] && (
+      <PodiumCard
+        placement={1}
+        item={top3[0]}
+        className=""
+        height="h-[260px]"
+        tint="rgba(0,231,1,0.12)"
+        edgeColor={KICK_GREEN}
+        badge={<Crown size={18} color={KICK_GREEN} />}
+        highlight
+      />
+    )}
+    {top3[2] && (
+      <PodiumCard
+        placement={3}
+        item={top3[2]}
+        className=""
+        height="h-[200px]"
+        tint="rgba(250,204,21,0.10)"
+        edgeColor="#facc15"
+        badge={<MedalRibbon n={3} color="#facc15" />}
+        highlight={false}
+      />
+    )}
+  </div>
+
+  {/* Ranks 4–15 */}
+  <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
+    <div className="grid grid-cols-12 text-[11px] uppercase tracking-wider text-gray-400 px-3 py-2">
+      <div className="col-span-2">Rank</div>
+      <div className="col-span-6">Player</div>
+      <div className="col-span-4 text-right">Wagered</div>
+    </div>
+    <div className="divide-y divide-white/5">
+      {rows.slice(3, 15).map((r) => (
+        <div key={r.rank} className="grid grid-cols-12 items-center px-3 py-3">
+          <div className="col-span-2 font-black" style={{ color: "white" }}>#{r.rank}</div>
+          <div className="col-span-6">{r.name}</div>
+          <div className="col-span-4 text-right font-semibold text-gray-200">{formatMoney(r.wagered)}</div>
+        </div>
+      ))}
+      {rows.length <= 3 && (
+        <div className="px-3 py-6 text-sm text-gray-400">No more players yet.</div>
+      )}
+    </div>
+  </div>
+</>
+
         )}
       </div>
     </section>
