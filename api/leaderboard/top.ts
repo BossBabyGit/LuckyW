@@ -1,4 +1,8 @@
-// api/leaderboard/top.ts
+res.setHeader('Access-Control-Allow-Origin', '*');
+res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+if (req.method === 'OPTIONS') return res.status(200).end();
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ensureSchema, getTop15ForCurrentMonth } from '../../lib/db';
 
