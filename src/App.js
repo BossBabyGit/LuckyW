@@ -591,20 +591,16 @@ function LeaderboardsPage() {
                 Monthly Leaderboard
               </h1>
               <button
-                onClick={() => setShowHistory((h) => !h)}
+                onClick={() => setShowHistory(true)}
                 className="text-xs px-3 py-1 rounded border"
                 style={{ borderColor: KICK_GREEN, color: KICK_GREEN }}
               >
-                {showHistory ? 'Back' : 'History'}
+                History
               </button>
             </header>
 
-            {showHistory ? (
-              <HistoryTable rows={historyData} range={historyRange} loading={historyLoading} />
-            ) : (
-              <>
-                {/* Podium (exact 2 / 1 / 3 layout preserved) */}
-                <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-4">
+            {/* Podium (exact 2 / 1 / 3 layout preserved) */}
+            <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-4">
               {top3[1] && (
                 <PodiumCard
                   placement={2}
@@ -693,10 +689,17 @@ function LeaderboardsPage() {
                 )}
               </div>
             </div>
+
+            {showHistory && (
+              <HistoryModal
+                rows={historyData}
+                range={historyRange}
+                loading={historyLoading}
+                onClose={() => setShowHistory(false)}
+              />
+            )}
           </>
         )}
-      </>
-    )}
       </div>
     </section>
   );
@@ -797,6 +800,22 @@ function HistoryTable({ rows, range, loading }) {
           {formatPeriod(range.start, range.end)}
         </div>
       )}
+    </div>
+  );
+}
+
+function HistoryModal({ rows, range, loading, onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="relative w-full max-w-2xl">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-sm px-2 py-1 rounded bg-black/60 border border-white/20"
+        >
+          Close
+        </button>
+        <HistoryTable rows={rows} range={range} loading={loading} />
+      </div>
     </div>
   );
 }
