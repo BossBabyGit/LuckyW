@@ -473,7 +473,8 @@ function LeaderboardsPage() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
   const [showHistory, setShowHistory] = React.useState(false);
-  const [historyRows, setHistoryRows] = React.useState([]);
+  // store previously fetched leaderboard entries
+  const [historyData, setHistoryData] = React.useState([]);
   const [historyRange, setHistoryRange] = React.useState({ start: "", end: "" });
   const [historyLoading, setHistoryLoading] = React.useState(true);
 
@@ -545,12 +546,12 @@ function LeaderboardsPage() {
           prize: prizeByRank[x.rank] ?? 0,
         }));
         if (!alive) return;
-        setHistoryRows(items);
+        setHistoryData(items);
         setHistoryRange({ start: j.period_start, end: j.period_end });
       } catch (e) {
         if (!alive) return;
         console.error(e);
-        setHistoryRows([]);
+        setHistoryData([]);
         setHistoryRange({ start: "", end: "" });
       } finally {
         if (alive) setHistoryLoading(false);
@@ -599,7 +600,7 @@ function LeaderboardsPage() {
             </header>
 
             {showHistory ? (
-              <HistoryTable rows={historyRows} range={historyRange} loading={historyLoading} />
+              <HistoryTable rows={historyData} range={historyRange} loading={historyLoading} />
             ) : (
               <>
                 {/* Podium (exact 2 / 1 / 3 layout preserved) */}
