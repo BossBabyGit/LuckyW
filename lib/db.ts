@@ -58,3 +58,24 @@ export async function getTop15ForCurrentPeriod() {
   `;
   return rows; // array of rows
 }
+
+export async function getTop15ForPreviousPeriod() {
+  const now = new Date().toISOString();
+  const period = await sql/* sql */`
+    SELECT period_start, period_end
+    FROM leaderboard_entries
+    WHERE period_end <= ${now}
+    ORDER BY period_end DESC
+    LIMIT 1
+  `;
+  if (period.length === 0) return { period_start: null, period_end: null, rows: [] };
+  const { period_start, period_end } = period[0] as { period_start: string; period_end: string };
+  const rows = await sql/* sql */`
+    SELECT username, (wagered)::float AS wagered, rank
+    FROM leaderboard_entries
+    WHERE period_start = ${period_start} AND period_end = ${period_end}
+    ORDER BY rank ASC
+    LIMIT 15
+  `;
+  return { period_start, period_end, rows };
+}
