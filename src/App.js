@@ -66,7 +66,12 @@ function Particles() {
   useEffect(() => {
     const canvas = document.getElementById("particles");
     if (!(canvas instanceof HTMLCanvasElement)) return;
-    const ctx = canvas.getContext("2d");
+    let ctx = null;
+    try {
+      ctx = canvas.getContext("2d");
+    } catch {
+      return; // canvas not supported (e.g., in tests)
+    }
     if (!ctx) return;
 
     let raf = 0;
@@ -472,6 +477,10 @@ function LeaderboardsPage() {
   const [rows, setRows] = React.useState(FALLBACK);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
+  const [historyOpen, setHistoryOpen] = React.useState(false);
+  const [historyRows, setHistoryRows] = React.useState([]);
+  const [historyRange, setHistoryRange] = React.useState({ start: "", end: "" });
+  const [historyLoading, setHistoryLoading] = React.useState(false);
   const [showHistory, setShowHistory] = React.useState(false);
   const [historyRows, setHistoryRows] = React.useState([]);
   const [historyRange, setHistoryRange] = React.useState({ start: "", end: "" });
@@ -490,6 +499,7 @@ function LeaderboardsPage() {
   }), []);
 
   const API_URL = "https://lucky-w.vercel.app/api/leaderboard/top"; // <-- your working endpoint
+  const HISTORY_URL = "/api/leaderboard/previous";
   const HISTORY_URL = "https://lucky-w.vercel.app/api/leaderboard/previous";
   console.log("Leaderboard API_URL:", API_URL); // leave this for debugging
 
@@ -531,6 +541,39 @@ function LeaderboardsPage() {
     return () => { alive = false; };
   }, [API_URL, prizeByRank, forceMock, FALLBACK]);
 
+  const fetchHistory = React.useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const r = await fetch(HISTORY_URL, { headers: { "Accept": "application/json" } });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+      const items = (j.items ?? []).map((x) => ({
+        rank: x.rank,
+        name: x.username,
+        wagered: Number(x.wagered || 0),
+        prize: prizeByRank[x.rank] ?? 0,
+      }));
+      setHistoryRows(items);
+      setHistoryRange({ start: j.period_start, end: j.period_end });
+    } catch (e) {
+      console.error(e);
+      setHistoryRows([]);
+      setHistoryRange({ start: "", end: "" });
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [HISTORY_URL, prizeByRank]);
+
+  const openHistory = () => {
+    setHistoryOpen(true);
+    if (!historyRows.length && !historyLoading) {
+      fetchHistory();
+    }
+  };
+
+  const closeHistory = () => setHistoryOpen(false);
+
+
   React.useEffect(() => {
     let alive = true;
     (async () => {
@@ -559,6 +602,7 @@ function LeaderboardsPage() {
     return () => { alive = false; };
   }, [HISTORY_URL, prizeByRank]);
 
+
   // --- 5) Normalize prizes AGAIN at render-time (so fallback never leaks old values) ---
   const viewRows = React.useMemo(
     () => rows.map(r => ({ ...r, prize: prizeByRank[r.rank] ?? 0 })),
@@ -573,23 +617,32 @@ function LeaderboardsPage() {
   return (
     <section className="relative z-20 py-16 px-6">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
         {error && (
-          <div className="mb-4 text-sm text-yellow-300 opacity-80">
-            {error}
-          </div>
+          <div className="mb-4 text-sm text-yellow-300 opacity-80">{error}</div>
         )}
-
         {loading ? (
           <div className="text-white/70">Loading leaderboard…</div>
         ) : (
           <>
+
             {/* Title stays up top */}
+
             <header className="mb-6 flex items-center justify-center gap-4">
               <h1 className="text-3xl md:text-4xl font-extrabold" style={{ color: KICK_GREEN }}>
                 Monthly Leaderboard
               </h1>
               <button
+
+                onClick={openHistory}
+                className="text-xs px-3 py-1 rounded border"
+                style={{ borderColor: KICK_GREEN, color: KICK_GREEN }}
+              >
+                History
+              </button>
+            </header>
+
+            <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-4">
+
                 onClick={() => setShowHistory((h) => !h)}
                 className="text-xs px-3 py-1 rounded border"
                 style={{ borderColor: KICK_GREEN, color: KICK_GREEN }}
@@ -604,6 +657,7 @@ function LeaderboardsPage() {
               <>
                 {/* Podium (exact 2 / 1 / 3 layout preserved) */}
                 <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-4">
+
               {top3[1] && (
                 <PodiumCard
                   placement={2}
@@ -642,7 +696,6 @@ function LeaderboardsPage() {
               )}
             </div>
 
-            {/* Countdown UNDERNEATH the podiums (boxy, consistent) */}
             <div className="mb-8">
               <div className="flex items-center justify-center gap-4">
                 {[
@@ -668,7 +721,6 @@ function LeaderboardsPage() {
               </div>
             </div>
 
-            {/* Ranks 4–15 (now includes Prize column to match actual design) */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
               <div className="grid grid-cols-12 text-[11px] uppercase tracking-wider text-gray-400 px-3 py-2">
                 <div className="col-span-2">Rank</div>
@@ -697,6 +749,21 @@ function LeaderboardsPage() {
       </>
     )}
       </div>
+
+      {historyOpen && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+          <div className="relative w-full max-w-md mx-4">
+            <button
+              onClick={closeHistory}
+              className="absolute top-2 right-2 text-xs px-2 py-1 rounded border"
+              style={{ borderColor: KICK_GREEN, color: KICK_GREEN }}
+            >
+              Close
+            </button>
+            <HistoryTable rows={historyRows} range={historyRange} loading={historyLoading} />
+          </div>
+        </div>
+      )}
     </section>
   );
 }
