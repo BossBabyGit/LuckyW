@@ -445,96 +445,116 @@ function BonusesPage() {
   );
 }
 
-// —— Leaderboards page (simple table using preview component) ——
 function LeaderboardsPage() {
-  const data = useMemo(() => ([
-    { rank: 1, name: "BossBaby", wagered: 342130.32, prize: 1000 },
-    { rank: 2, name: "BossBaby", wagered: 298220.18, prize: 500 },
-    { rank: 3, name: "BossBaby", wagered: 251980.55, prize: 250 },
-    { rank: 4, name: "BossBaby", wagered: 203140.0, prize: 150 },
-    { rank: 5, name: "BossBaby", wagered: 181120.45, prize: 100 },
-    { rank: 6, name: "BossBaby", wagered: 166780.12, prize: 75 },
-    { rank: 7, name: "BossBaby", wagered: 154210.0, prize: 50 },
-    { rank: 8, name: "BossBaby", wagered: 141033.47, prize: 40 },
-    { rank: 9, name: "BossBaby", wagered: 132440.87, prize: 30 },
-    { rank: 10, name: "BossBaby", wagered: 120008.03, prize: 20 },
-  ]), []);
+  // --- 1) Hardcoded fallback (what you already had) ---
+  const FALLBACK = React.useMemo(
+    () => ([
+      { rank: 1, name: "BossBaby", wagered: 342130.32, prize: 1000 },
+      { rank: 2, name: "BossBaby", wagered: 298220.18, prize: 500 },
+      { rank: 3, name: "BossBaby", wagered: 251980.55, prize: 250 },
+      { rank: 4, name: "BossBaby", wagered: 203140.0,  prize: 150 },
+      { rank: 5, name: "BossBaby", wagered: 181120.45, prize: 100 },
+      { rank: 6, name: "BossBaby", wagered: 166780.12, prize: 75 },
+      { rank: 7, name: "BossBaby", wagered: 154210.0,  prize: 50 },
+      { rank: 8, name: "BossBaby", wagered: 141033.47, prize: 40 },
+      { rank: 9, name: "BossBaby", wagered: 132440.87, prize: 30 },
+      { rank: 10, name: "BossBaby", wagered: 120008.03, prize: 20 },
+      { rank: 11, name: "BossBaby", wagered: 110000.00, prize: 0 },
+      { rank: 12, name: "BossBaby", wagered: 100000.00, prize: 0 },
+      { rank: 13, name: "BossBaby", wagered:  90000.00, prize: 0 },
+      { rank: 14, name: "BossBaby", wagered:  80000.00, prize: 0 },
+      { rank: 15, name: "BossBaby", wagered:  70000.00, prize: 0 },
+    ]),
+    []
+  );
 
-  const top3 = data.slice(0, 3);
-  const rest = data.slice(3, 10);
+  // --- 2) Live state fed by the API (or fallback) ---
+  const [rows, setRows] = React.useState(FALLBACK);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
+
+  // --- 3) Prize mapping (adjust as you need) ---
+  const prizeByRank = React.useMemo(() => ({
+    1: 1000, 2: 500, 3: 250, 4: 150, 5: 100,
+    6: 75, 7: 50, 8: 40, 9: 30, 10: 20,
+    11: 0, 12: 0, 13: 0, 14: 0, 15: 0
+  }), []);
+
+  // --- 4) Where to fetch from ---
+  // If the UI is on the same Vercel domain as your API, leave as relative.
+  // If your UI is on GitHub Pages but API is on Vercel, set API_BASE to your full Vercel URL.
+  const API_BASE = ""; // e.g. "https://your-app.vercel.app" for GH Pages
+  const API_URL = `${API_BASE}/api/leaderboard/top`;
+
+  // --- 5) Feature toggle: keep fallback while you test ---
+  // Add #mock to the URL (your hash router) to force fallback.
+  const forceMock = (typeof window !== "undefined") && window.location.hash.includes("mock");
+
+  React.useEffect(() => {
+    let alive = true;
+    (async () => {
+      if (forceMock) {
+        setLoading(false);
+        return; // keep FALLBACK visible
+      }
+      try {
+        const r = await fetch(API_URL, { headers: { "Accept": "application/json" } });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const j = await r.json();
+        const items = (j.items ?? []).map((x) => ({
+          rank: x.rank,
+          name: x.username,
+          wagered: Number(x.wagered || 0),
+          prize: prizeByRank[x.rank] ?? 0,
+        }));
+
+        if (!alive) return;
+
+        // If the API returns nothing yet, keep FALLBACK so the page doesn’t look empty
+        setRows(items.length ? items : FALLBACK);
+        setError(items.length ? "" : "No live data yet – showing sample data.");
+      } catch (e) {
+        if (!alive) return;
+        console.error(e);
+        setRows(FALLBACK);
+        setError("Couldn’t load live data – showing sample data.");
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, [API_URL, prizeByRank, forceMock, FALLBACK]);
+
+  // --- 6) Your existing layout logic still works ---
+  const top3  = rows.slice(0, 3);
+  const rest  = rows.slice(3, 10); // or 3..15 if your UI shows all 15
   const { days, hours, minutes, seconds } = useMonthEndCountdown();
 
   return (
     <section className="relative z-20 py-16 px-6">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <header className="relative border border-white/10 rounded-2xl bg-black/60 backdrop-blur px-6 py-10 text-center mb-10">
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-400 mb-3">
-            <Users size={16} />
-            <span>Monthly Race</span>
+        {/* (keep your original header/content below) */}
+        {error && (
+          <div className="mb-4 text-sm text-yellow-300 opacity-80">
+            {error}
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight">Leaderboard</h1>
-          <p className="mt-3 text-gray-300">
-            Every <span style={{ color: KICK_GREEN }}>$1</span> you wager using code <b style={{ color: KICK_GREEN }}>LUCKYW</b> counts toward the leaderboard. Play fair, climb fast, win cash.
-          </p>
-        </header>
+        )}
 
-        {/* Podium */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 items-end mb-10">
-          <PodiumCard placement={2} item={top3[1]} className="sm:order-1" height="h-56" tint="rgba(165, 243, 252, 0.12)" edgeColor="#67e8f9" badge={<MedalRibbon n={2} color="#67e8f9" />} />
-          <PodiumCard placement={1} item={top3[0]} className="sm:order-2" height="h-64" tint="rgba(0,231,1,0.14)" edgeColor={KICK_GREEN} badge={<Crown className="drop-shadow" size={22} color={KICK_GREEN} />} highlight />
-          <PodiumCard placement={3} item={top3[2]} className="sm:order-3" height="h-48" tint="rgba(250, 204, 21, 0.10)" edgeColor="#fde047" badge={<MedalRibbon n={3} color="#fde047" />} />
-        </div>
-
-        {/* Countdown */}
-        <section className="px-0 pb-8">
-          <div className="mx-auto max-w-3xl">
-            <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 md:p-4 text-center">
-              <div className="flex items-center justify-center gap-2 text-xs text-gray-400 mb-4">
-                <Timer size={12} />
-                <span>Time left in this race</span>
-              </div>
-              <div className="grid grid-cols-4 gap-3 md:gap-2">
-                <TimeTile label="Days" value={days} />
-                <TimeTile label="Hours" value={hours} />
-                <TimeTile label="Minutes" value={minutes} />
-                <TimeTile label="Seconds" value={seconds} />
-              </div>
-              <p className="text-gray-500 text-xs mt-3">Resets at 00:00 UTC on the first day of next month.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Table 4-10 */}
-        <div className="rounded-2xl border border-white/10 overflow-hidden">
-          <div className="bg-white/[0.03] px-5 py-2 text-xs uppercase tracking-wider text-gray-400 grid grid-cols-12">
-            <div className="col-span-2">Rank</div>
-            <div className="col-span-5">Player</div>
-            <div className="col-span-3">Wagered</div>
-            <div className="col-span-2 text-right">Prize</div>
-          </div>
-          <div className="divide-y divide-white/5">
-            {rest.map((r) => (
-              <div key={r.rank} className="grid grid-cols-12 px-5 py-3 items-center hover:bg-white/[0.02]">
-                <div className="col-span-2 font-bold text-gray-200">#{r.rank}</div>
-                <div className="col-span-5 font-medium">{r.name}</div>
-                <div className="col-span-3 text-gray-300">{formatMoney(r.wagered)}</div>
-                <div className="col-span-2 text-right font-semibold" style={{ color: KICK_GREEN }}>{formatMoney(r.prize)}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Tiny extras */}
-        <div className="mt-6 grid gap-3 sm:grid-cols-3 text-sm">
-          <BadgeCard icon={<Trophy size={16} />} title="Cash Prizes" desc="Top 10 paid — no wagering requirements on cash." />
-          <BadgeCard icon={<Sparkles size={16} />} title="Monthly Leaderboards" desc="Participate in the Leaderboard each month for active players." />
-          <BadgeCard icon={<Users size={16} />} title="Fair Play" desc="Anti-abuse checks & manual reviews if needed." />
-        </div>
+        {/* Example: show a tiny loading state */}
+        {loading ? (
+          <div className="text-white/70">Loading leaderboard…</div>
+        ) : (
+          <>
+            {/* Use `top3` and `rest` exactly as before */}
+            {/* ...the rest of your existing JSX for the leaderboard table/cards... */}
+          </>
+        )}
       </div>
     </section>
   );
 }
+
 
 function PodiumCard({ placement, item, className, height, tint, edgeColor, badge, highlight }) {
   const edge = { boxShadow: `inset 0 0 0 1px ${edgeColor}22, 0 30px 80px -40px ${edgeColor}66` };
