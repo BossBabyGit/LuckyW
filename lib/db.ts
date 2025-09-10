@@ -48,6 +48,7 @@ export async function getTop15ForCurrentMonth() {
   const now = new Date();
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0));
   const end   = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+  // Tagged-template form returns rows directly (array of objects)
   const rows = await sql/* sql */`
     SELECT username, (wagered)::float AS wagered, rank
     FROM leaderboard_entries
@@ -55,6 +56,5 @@ export async function getTop15ForCurrentMonth() {
     ORDER BY rank ASC
     LIMIT 15
   `;
-  // With tagged template, Neon returns rows directly
-  return rows;
+  return rows; // array
 }

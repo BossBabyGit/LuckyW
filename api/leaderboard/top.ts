@@ -3,7 +3,7 @@ import { getTop15ForCurrentMonth } from '../../lib/db';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const rows = await getTop15ForCurrentMonth();
+    const rows = await getTop15ForCurrentMonth(); // already an array
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=600');
     return res.status(200).json({ items: rows });
   } catch (e) {
