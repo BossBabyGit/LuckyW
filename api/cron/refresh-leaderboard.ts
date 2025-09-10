@@ -1,12 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ensureSchema, upsertEntry } from '../../lib/db';
 
-function currentMonthUTC() {
+function currentMonthRange() {
   const now = new Date();
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0));
   const end   = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+  console.log("Fetching stats between:", start.toISOString(), "and", end.toISOString());
   return { startISO: start.toISOString(), endISO: end.toISOString() };
 }
+
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') return res.status(405).end();
@@ -19,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const userId = process.env.ROOBET_USER_ID!;
     if (!base || !token || !userId) throw new Error('Missing env vars');
 
-    const { startISO, endISO } = currentMonthUTC();
+    const { startISO, endISO } = currentMonthRange();
 
     const url = new URL('/affiliate/v2/stats', base);
     url.searchParams.set('userId', userId);
