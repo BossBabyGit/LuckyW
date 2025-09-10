@@ -47,14 +47,12 @@ export async function upsertEntry(row: {
   `;
 }
 
-export async function getTop15ForCurrentMonth() {
-  const now = new Date();
-  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0));
-  const end   = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+export async function getTop15ForCurrentPeriod() {
+  const now = new Date().toISOString();
   const rows = await sql/* sql */`
     SELECT username, (wagered)::float AS wagered, rank
     FROM leaderboard_entries
-    WHERE period_start = ${start.toISOString()} AND period_end = ${end.toISOString()}
+    WHERE period_start <= ${now} AND period_end > ${now}
     ORDER BY rank ASC
     LIMIT 15
   `;

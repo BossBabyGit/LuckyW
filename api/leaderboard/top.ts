@@ -1,6 +1,6 @@
 // api/leaderboard/top.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ensureSchema, getTop15ForCurrentMonth } from '../../lib/db';
+import { ensureSchema, getTop15ForCurrentPeriod } from '../../lib/db';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // --- CORS (must be INSIDE the handler) ---
@@ -15,7 +15,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     await ensureSchema(); // ensure table exists
-    const rows = await getTop15ForCurrentMonth();
+    const rows = await getTop15ForCurrentPeriod();
 
     // 60s edge cache (optional)
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=600');
