@@ -483,7 +483,7 @@ function LeaderboardsPage() {
   // --- 4) Where to fetch from ---
   // If the UI is on the same Vercel domain as your API, leave as relative.
   // If your UI is on GitHub Pages but API is on Vercel, set API_BASE to your full Vercel URL.
-  const API_BASE = ""; // e.g. "https://your-app.vercel.app" for GH Pages
+  const API_BASE = "https://lucky-w.vercel.app/"; // e.g. "https://your-app.vercel.app" for GH Pages
   const API_URL = `${API_BASE}/api/leaderboard/top`;
 
   // --- 5) Feature toggle: keep fallback while you test ---
