@@ -2,9 +2,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ensureSchema, upsertEntry } from '../../lib/db';
 
 function currentMonthRange() {
-  const now = new Date();
-  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0));
-  const end   = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+  const start = new Date(Date.UTC(2025, 8, 26, 0, 0, 0)); // Aug 1, 2025
+  const end   = new Date(Date.UTC(2025, 9, 9, 0, 0, 0)); // Sep 1, 2025
+
   console.log("Fetching stats between:", start.toISOString(), "and", end.toISOString());
   return { startISO: start.toISOString(), endISO: end.toISOString() };
 }
