@@ -1,0 +1,62 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { ensureSchema, upsertEntry } from '../../lib/db';
+
+function currentMonthUTC() {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0));
+  const end   = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+  return { startISO: start.toISOString(), endISO: end.toISOString() };
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') return res.status(405).end();
+
+  try {
+    await ensureSchema();
+
+    const base = process.env.ROOBET_BASE_URL!;
+    const token = process.env.ROOBET_BEARER!;
+    const userId = process.env.ROOBET_USER_ID!;
+    if (!base || !token || !userId) throw new Error('Missing env vars');
+
+    const { startISO, endISO } = currentMonthUTC();
+
+    const url = new URL('/affiliate/v2/stats', base);
+    url.searchParams.set('userId', userId);
+    url.searchParams.set('startDate', startISO);
+    url.searchParams.set('endDate', endISO);
+
+    const r = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!r.ok) {
+      const t = await r.text();
+      return res.status(502).json({ error: `Upstream error: ${t}` });
+    }
+
+    const data: Array<{ uid: string; username: string; wagered: number }> = await r.json();
+
+    const top = (data ?? [])
+      .sort((a, b) => b.wagered - a.wagered)
+      .slice(0, 15);
+
+    let rank = 1;
+    for (const row of top) {
+      await upsertEntry({
+        period_start: startISO,
+        period_end: endISO,
+        uid: row.uid,
+        username: row.username,
+        wagered: Number(row.wagered || 0),
+        rank,
+      });
+      rank++;
+    }
+
+    return res.status(200).json({ ok: true, saved: top.length });
+  } catch (e: any) {
+    console.error(e);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
