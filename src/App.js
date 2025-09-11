@@ -310,15 +310,15 @@ function HomePage() {
       {/* SOCIAL STRIP */}
       <section className="relative z-20 px-6 pb-10">
         <div className="mx-auto max-w-7xl grid sm:grid-cols-3 gap-4">
-          <a href="#" className="rounded-2xl p-4 flex items-center justify-between" style={gradientRing}>
+          <a href="https://kick.com/luckyw" className="rounded-2xl p-4 flex items-center justify-between" style={gradientRing}>
             <div className="flex items-center gap-3"><Play /><span className="font-semibold">Watch Streams</span></div>
             <span style={{ color: KICK_GREEN }} className="text-sm">Kick</span>
           </a>
-          <a href="#" className="rounded-2xl p-4 flex items-center justify-between" style={gradientRing}>
+          <a href="https://discord.gg/EfDVbG7scK" className="rounded-2xl p-4 flex items-center justify-between" style={gradientRing}>
             <div className="flex items-center gap-3"><MessageCircle /><span className="font-semibold">Join the Chat</span></div>
             <span style={{ color: KICK_GREEN }} className="text-sm">Discord</span>
           </a>
-          <a href="#" className="rounded-2xl p-4 flex items-center justify-between" style={gradientRing}>
+          <a href="https://x.com/luckyy_w" className="rounded-2xl p-4 flex items-center justify-between" style={gradientRing}>
             <div className="flex items-center gap-3"><Twitter /><span className="font-semibold">Follow Updates</span></div>
             <span style={{ color: KICK_GREEN }} className="text-sm">X</span>
           </a>
