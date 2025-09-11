@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Crown, Medal, Timer, Trophy, Users, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import useLeaderboardCountdown from "./useLeaderboardCountdown";
 
 const KICK_GREEN = "#00e701";
 
@@ -23,8 +24,8 @@ export default function LeaderboardPage() {
   const top3 = data.slice(0,3);
   const rest = data.slice(3,10);
 
-  // --- Countdown to month end ---
-  const { days, hours, minutes, seconds } = useMonthEndCountdown();
+  // --- Countdown to period end ---
+  const { days, hours, minutes, seconds } = useLeaderboardCountdown();
 
   return (
     <div className="min-h-screen flex flex-col text-white bg-black">
@@ -66,7 +67,7 @@ export default function LeaderboardPage() {
               <TimeTile label="Minutes" value={minutes} />
               <TimeTile label="Seconds" value={seconds} />
             </div>
-            <p className="text-gray-500 text-xs mt-3">Resets at 00:00 UTC on the first day of next month.</p>
+            <p className="text-gray-500 text-xs mt-3">Resets every 14 days at 00:00 UTC.</p>
           </div>
         </div>
       </section>
@@ -232,24 +233,6 @@ function BadgeCard({ icon, title, desc }){
 }
 
 // ——— Hooks ———
-function useMonthEndCountdown(){
-  const target = useMemo(() => {
-    const now = new Date();
-    const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
-    return nextMonth; // Midnight UTC at first of next month
-  }, []);
-  const [tick, setTick] = useState(Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setTick(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  const diff = Math.max(0, target - tick);
-  const d = Math.floor(diff / (1000*60*60*24));
-  const h = Math.floor((diff / (1000*60*60)) % 24);
-  const m = Math.floor((diff / (1000*60)) % 60);
-  const s = Math.floor((diff / 1000) % 60);
-  return { days: d, hours: h, minutes: m, seconds: s };
-}
 
 // ——— Utils ———
 function maskName(name){

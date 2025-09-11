@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ChevronDown, Sparkles, Gift, Trophy, ShieldCheck, Twitter, MessageCircle, Play, Copy, ExternalLink, Crown, Medal, Timer, Users } from "lucide-react";
+import useLeaderboardCountdown from "./useLeaderboardCountdown";
 
 // —— Brand Tokens ——
 const KICK_GREEN = "#00e701"; // exact green
@@ -569,7 +570,7 @@ function LeaderboardsPage() {
   // --- 6) Layout slices + countdown values ---
   const top3 = viewRows.slice(0, 3);      // [1st, 2nd, 3rd]
   const rest = viewRows.slice(3, 15);     // 4..15
-  const { days, hours, minutes, seconds } = useMonthEndCountdown(); // you already have this hook
+  const { days, hours, minutes, seconds } = useLeaderboardCountdown();
 
   return (
     <section className="relative z-20 py-16 px-6">
@@ -661,7 +662,7 @@ function LeaderboardsPage() {
                 ))}
               </div>
               <div className="mt-3 text-center text-gray-400 text-sm">
-                Resets at 00:00 on the 1st
+                Resets every 14 days at 00:00 UTC
               </div>
             </div>
 
@@ -839,24 +840,6 @@ function BadgeCard({ icon, title, desc }) {
   );
 }
 
-function useMonthEndCountdown() {
-  const target = useMemo(() => {
-    const now = new Date();
-    const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
-    return nextMonth;
-  }, []);
-  const [tick, setTick] = useState(Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setTick(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  const diff = Math.max(0, target - tick);
-  const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const m = Math.floor((diff / (1000 * 60)) % 60);
-  const s = Math.floor((diff / 1000) % 60);
-  return { days: d, hours: h, minutes: m, seconds: s };
-}
 
 // Obfuscate a username so only first two characters are visible
 function maskName(name) {
