@@ -876,16 +876,55 @@ function formatMoney(n) {
 // Reusable bits from your original files
 // =========================================================
 function LeaderboardPreview() {
-  const rows = useMemo(
-    () => [
-      { rank: 1, user: "BossBaby", points: 128430, prize: "$1,000" },
-      { rank: 2, user: "BossBaby", points: 117210, prize: "$500" },
-      { rank: 3, user: "BossBaby", points: 109980, prize: "$250" },
-      { rank: 4, user: "BossBaby", points: 89340, prize: "$150" },
-      { rank: 5, user: "BossBaby", points: 81120, prize: "$100" },
-    ],
+  // prize ladder for the preview (top 5 only)
+  const prizeByRank = useMemo(
+    () => ({ 1: 175, 2: 125, 3: 100, 4: 80, 5: 65 }),
     []
   );
+
+  // fallback in case the API is unreachable
+  const FALLBACK = useMemo(
+    () => [
+      { rank: 1, user: "BossBaby", points: 128430, prize: prizeByRank[1] },
+      { rank: 2, user: "BossBaby", points: 117210, prize: prizeByRank[2] },
+      { rank: 3, user: "BossBaby", points: 109980, prize: prizeByRank[3] },
+      { rank: 4, user: "BossBaby", points: 89340, prize: prizeByRank[4] },
+      { rank: 5, user: "BossBaby", points: 81120, prize: prizeByRank[5] },
+    ],
+    [prizeByRank]
+  );
+
+  const [rows, setRows] = useState(FALLBACK);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const r = await fetch("https://lucky-w.vercel.app/api/leaderboard/top", {
+          headers: { Accept: "application/json" },
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const j = await r.json();
+        const items = (j.items ?? [])
+          .slice(0, 5)
+          .map((x) => ({
+            rank: x.rank,
+            user: x.username,
+            points: Number(x.wagered || 0),
+            prize: prizeByRank[x.rank] ?? 0,
+          }));
+        if (!alive) return;
+        setRows(items.length ? items : FALLBACK);
+      } catch (e) {
+        if (!alive) return;
+        console.error(e);
+        setRows(FALLBACK);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [FALLBACK, prizeByRank]);
 
   return (
     <div className="p-5 md:p-6">
@@ -907,7 +946,7 @@ function LeaderboardPreview() {
             <div className="col-span-2 font-black" style={{ color: r.rank <= 3 ? KICK_GREEN : "white" }}>#{r.rank}</div>
             <div className="col-span-5">{maskName(r.user)}</div>
             <div className="col-span-3 text-gray-300">{r.points.toLocaleString()}</div>
-            <div className="col-span-2 text-right font-semibold">{r.prize}</div>
+            <div className="col-span-2 text-right font-semibold">{formatMoney(r.prize)}</div>
           </div>
         ))}
       </div>
