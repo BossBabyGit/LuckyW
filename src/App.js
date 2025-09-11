@@ -773,7 +773,7 @@ function HistoryTable({ rows, range, loading }) {
     return <div className="text-white/70 mb-8">Loading history…</div>;
   }
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden mb-8">
+    <div className="rounded-2xl border border-white/10 bg-black/80 overflow-hidden mb-8">
       <div className="grid grid-cols-12 text-[11px] uppercase tracking-wider text-gray-400 px-3 py-2">
         <div className="col-span-2">Rank</div>
         <div className="col-span-5">Player</div>
@@ -806,11 +806,11 @@ function HistoryTable({ rows, range, loading }) {
 
 function HistoryModal({ rows, range, loading, onClose }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
       <div className="relative w-full max-w-2xl">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-sm px-2 py-1 rounded bg-black/60 border border-white/20"
+          className="absolute z-10 top-2 right-2 text-sm px-2 py-1 rounded bg-black/80 border border-white/20"
         >
           Close
         </button>
