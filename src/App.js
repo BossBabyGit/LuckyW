@@ -289,7 +289,7 @@ function HomePage() {
         <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-4xl md:text-5xl font-extrabold mb-4" style={{ color: KICK_GREEN }}>How Leaderboards Work</h2>
-            <p className="text-gray-300 mb-6">Wager on partnered sites, collect points, and climb the ranks. Monthly resets keep races fresh and competitive.</p>
+            <p className="text-gray-300 mb-6">Wager on partnered sites, collect points, and climb the ranks. Frequent resets keep races fresh and competitive.</p>
             <ul className="space-y-3 text-gray-200">
               <li><span style={{ color: KICK_GREEN }}>•</span> Earn points by wagering on <b>Roobet</b></li>
               <li><span style={{ color: KICK_GREEN }}>•</span> Top ranks receive <b>CASH Prizes</b></li>
@@ -371,7 +371,7 @@ function BonusesPage() {
       id: 3,
       title: "Enjoy Bonuses & Auto-Entry",
       desc: <>
-        Claim exclusive bonuses, weekly drops, and reloads. Your wagers are <i>automatically</i> tracked toward the LuckyW monthly race.
+        Claim exclusive bonuses, weekly drops, and reloads. Your wagers are <i>automatically</i> tracked toward the LuckyW Leaderboard.
       </>,
       img: "/leaderboard2d.png",
       ctaText: "View Leaderboards",
@@ -589,7 +589,7 @@ function LeaderboardsPage() {
             {/* Title stays up top */}
             <header className="mb-6 flex items-center justify-center gap-4">
               <h1 className="text-3xl md:text-4xl font-extrabold" style={{ color: KICK_GREEN }}>
-                Monthly Leaderboard
+                Current Leaderboard
               </h1>
               <button
                 onClick={() => setShowHistory(true)}
@@ -912,7 +912,7 @@ function LeaderboardPreview() {
   return (
     <div className="p-5 md:p-6">
       <div className="flex items-center justify-between mb-4">
-        <div className="text-xl font-extrabold">August Race</div>
+        <div className="text-xl font-extrabold">Current Leaderboard</div>
         <a href="#/leaderboards" className="text-sm" style={{ color: KICK_GREEN }}>
           View all
         </a>
