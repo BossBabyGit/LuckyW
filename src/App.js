@@ -869,7 +869,7 @@ function maskName(name) {
 function formatMoney(n) {
   const isIntPrize = Number.isInteger(n);
   const value = isIntPrize ? n : Math.round(n * 100) / 100;
-  return `$${value.toLocaleString(undefined, { minimumFractionDigits: isIntPrize ? 0 : 2, maximumFractionDigits: 2 })}`;
+  return `$${value.toLocaleString(undefined, { minimumFractionDigits: isIntPrize ? 0 : 2, maximumFractionDigits: 1 })}`;
 }
 
 // =========================================================
