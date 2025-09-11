@@ -363,7 +363,7 @@ function BonusesPage() {
       desc: <>Complete KYC (identity verification) and secure your profile. Verified accounts unlock all promos and leaderboard prizes.</>,
       img: "/verify.png",
       ctaText: "Verify Account",
-      ctaHref: "https://roo.bet/account/verify",
+      ctaHref: "https://roo.bet/?ref=LUCKYW",
       external: true,
     },
     {
