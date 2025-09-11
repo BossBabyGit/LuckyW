@@ -372,7 +372,7 @@ function BonusesPage() {
       desc: <>
         Claim exclusive bonuses, weekly drops, and reloads. Your wagers are <i>automatically</i> tracked toward the LuckyW monthly race.
       </>,
-      img: "/leaderboar2d.png",
+      img: "/leaderboard2d.png",
       ctaText: "View Leaderboards",
       ctaHref: "#/leaderboards",
       external: false,
