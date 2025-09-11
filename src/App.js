@@ -28,6 +28,7 @@ export default function App() {
   let Page = HomePage;
   if (path.startsWith("/bonuses")) Page = BonusesPage;
   if (path.startsWith("/leaderboards")) Page = LeaderboardsPage;
+  if (path.startsWith("/rules")) Page = RulesPage;
 
   return (
     <Layout>
@@ -152,7 +153,7 @@ function Navbar() {
           <li>{link("/", "Home")}</li>
           <li>{link("/bonuses", "Bonuses")}</li>
           <li>{link("/leaderboards", "Leaderboards")}</li>
-          <li><a href="#/rules" className="hover:text-white">Rules</a></li>
+          <li>{link("/rules", "Rules")}</li>
         </ul>
         <button aria-label="menu" className="md:hidden border rounded-xl px-3 py-2 text-sm" style={{ borderColor: KICK_GREEN, color: KICK_GREEN }} onClick={() => setOpen((v) => !v)}>
           Menu
@@ -163,7 +164,7 @@ function Navbar() {
           {link("/", "Home")}
           {link("/bonuses", "Bonuses")}
           {link("/leaderboards", "Leaderboards")}
-          <a href="#/rules">Rules</a>
+          {link("/rules", "Rules")}
         </div>
       )}
     </nav>
@@ -178,9 +179,31 @@ function Footer() {
           <div className="text-2xl font-extrabold" style={{ color: KICK_GREEN }}>LuckyW</div>
           <p className="mt-3 text-sm text-gray-400">Live leaderboards and curated bonuses.</p>
         </div>
-        <FooterCol title="Pages" links={["Home", "Bonuses", "Leaderboards"]} />
-        <FooterCol title="Socials" links={["Kick", "Discord", "X"]} />
-        <FooterCol title="Legal" links={["Terms", "Privacy", "Responsible Gaming"]} />
+        <FooterCol
+          title="Pages"
+          links={[
+            { label: "Home", href: "#/" },
+            { label: "Bonuses", href: "#/bonuses" },
+            { label: "Leaderboards", href: "#/leaderboards" },
+            { label: "Rules", href: "#/rules" },
+          ]}
+        />
+        <FooterCol
+          title="Socials"
+          links={[
+            { label: "Kick", href: "#" },
+            { label: "Discord", href: "#" },
+            { label: "X", href: "#" },
+          ]}
+        />
+        <FooterCol
+          title="Legal"
+          links={[
+            { label: "Terms", href: "#" },
+            { label: "Privacy", href: "#" },
+            { label: "Responsible Gaming", href: "#" },
+          ]}
+        />
       </div>
       <div className="mx-auto max-w-7xl px-6 pb-10 text-xs text-gray-500">© {new Date().getFullYear()} LuckyW — All rights reserved.</div>
     </footer>
@@ -193,7 +216,9 @@ function FooterCol({ title, links }) {
       <div className="font-semibold mb-3" style={{ color: KICK_GREEN }}>{title}</div>
       <ul className="space-y-2 text-gray-300">
         {links.map((l) => (
-          <li key={l} className="hover:text-white/90 cursor-pointer"><a href="#">{l}</a></li>
+          <li key={l.label} className="hover:text-white/90 cursor-pointer">
+            <a href={l.href}>{l.label}</a>
+          </li>
         ))}
       </ul>
     </div>
@@ -958,3 +983,38 @@ const faqItems = [
   { q: "Is there an entry fee?", a: "No entry fees. Participation is free — just play on partnered sites via LuckyW to track your stats." },
   { q: "How do you prevent abuse?", a: "We flag suspicious wager patterns, collusion, and risk-free loops. Violations may lead to point removal or disqualification." },
 ];
+
+function RulesPage() {
+  const cardStyle = {
+    border: "1px solid rgba(255,255,255,0.06)",
+    boxShadow: "0 10px 30px -20px rgba(0,231,1,0.18)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.2))",
+  };
+  return (
+    <div className="mx-auto max-w-3xl px-6 py-16 space-y-8">
+      <h1 className="text-4xl font-extrabold mb-8" style={{ color: KICK_GREEN }}>Rules</h1>
+      <div className="space-y-8">
+        <div style={cardStyle} className="p-6 rounded-2xl">
+          <h2 className="text-xl font-semibold mb-4">Wagering Rules</h2>
+          <p className="mb-2">Only Slots and House Games are eligible.</p>
+          <p>🚫 Dice, live games, and sports bets do not count.</p>
+        </div>
+        <div style={cardStyle} className="p-6 rounded-2xl">
+          <h2 className="text-xl font-semibold mb-4">Wager contribution by RTP</h2>
+          <ul className="space-y-2">
+            <li>🎰 RTP ≤ 97% → 100% of wager counts</li>
+            <li>🎯 RTP &gt; 97% → 50% of wager counts</li>
+            <li>💎 RTP ≥ 98% → 10% of wager counts</li>
+          </ul>
+        </div>
+        <div style={cardStyle} className="p-6 rounded-2xl">
+          <h2 className="text-xl font-semibold mb-4">Important Notes</h2>
+          <ul className="space-y-2">
+            <li>📅 You must be wagering under my referral to qualify.</li>
+            <li>Prizes are paid directly to your Roobet account.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
