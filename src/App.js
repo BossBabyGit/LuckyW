@@ -353,8 +353,8 @@ function BonusesPage() {
         </>
       ),
       img: "/roobet.png",
-      ctaText: "Open Roobet (tracked)",
-      ctaHref: "https://roo.bet/?ref=LUCKYW",
+      ctaText: "SignUp on Roobet",
+      ctaHref: "https://roobet.com/?ref=luckyw",
       external: true,
     },
     {
@@ -363,7 +363,7 @@ function BonusesPage() {
       desc: <>Complete KYC (identity verification) and secure your profile. Verified accounts unlock all promos and leaderboard prizes.</>,
       img: "/verify.png",
       ctaText: "Verify Account",
-      ctaHref: "https://roo.bet/?ref=LUCKYW",
+      ctaHref: "https://roobet.com/?ref=luckyw",
       external: true,
     },
     {
@@ -931,8 +931,8 @@ function Accordion({ question, answer, defaultOpen }) {
 }
 
 const faqItems = [
-  { q: "How do I earn points?", a: "Connect your casino account via our partner links and wager on supported games. Points scale with total wagered — check the Rules for the exact formula." },
-  { q: "When are prizes paid?", a: "Payouts for monthly races occur within 72 hours after the leaderboard locks. Instant drops and weekly promos are credited as advertised." },
-  { q: "Is there an entry fee?", a: "No entry fees. Participation is free — just play on partnered sites via LuckyW to track your points." },
+  { q: "How do I climb the Leaderboards?", a: "Sign up on Code LuckyW and you will automatically be entered into the Leaderboards. Each $ wagered gets added to the Leaderboard" },
+  { q: "When are prizes paid?", a: "Payouts for Leaderboards occur within 72 hours after the leaderboard locks. Instant drops and weekly promos are credited as advertised." },
+  { q: "Is there an entry fee?", a: "No entry fees. Participation is free — just play on partnered sites via LuckyW to track your stats." },
   { q: "How do you prevent abuse?", a: "We flag suspicious wager patterns, collusion, and risk-free loops. Violations may lead to point removal or disqualification." },
 ];
