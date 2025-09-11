@@ -373,8 +373,8 @@ function LeaderboardPreview() {
 
 function BonusCarousel() {
   const items = [
-    { id: 1, img: "./roobet.png", title: "Roobet — 100% up to $200", badge: "Exclusive" }
-    
+    { id: 1, img: "/roobet.png", title: "Roobet — 100% up to $200", badge: "Exclusive" }
+
   ];
   return (
     <div className="relative">
