@@ -1,38 +1,16 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ensureSchema, upsertEntry } from '../../lib/db';
 
-// Determine the current and previous 14-day periods
+// Fixed periods instead of calculated ones
 function getPeriods() {
-  // Anchor start of cycle (adjust if needed)
-  const anchorStartUTC = Date.UTC(2025, 7, 26, 0, 0, 0); // Aug 26, 2025 (month is 0-based)
-  const PERIOD_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
-
-  const now = new Date();
-  // Use midnight UTC to avoid timezone drift
-  const nowMidnightUTC = Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-    0, 0, 0
-  );
-
-  // Which 14-day bucket are we in?
-  const k = Math.floor((nowMidnightUTC - anchorStartUTC) / PERIOD_MS);
-
-  const currentStartMs = anchorStartUTC + k * PERIOD_MS; // inclusive
-  const currentEndMs = currentStartMs + PERIOD_MS; // exclusive
-
-  const previousStartMs = currentStartMs - PERIOD_MS;
-  const previousEndMs = currentStartMs;
-
   return {
     current: {
-      startISO: new Date(currentStartMs).toISOString(),
-      endISO: new Date(currentEndMs).toISOString(),
+      startISO: '2025-09-10T00:00:00.000Z', // Sep 10, 2025
+      endISO: '2025-09-25T00:00:00.000Z',   // Sep 25, 2025 (exclusive, so effectively Sep 24 end of day)
     },
     previous: {
-      startISO: new Date(previousStartMs).toISOString(),
-      endISO: new Date(previousEndMs).toISOString(),
+      startISO: '2025-08-26T00:00:00.000Z', // Aug 26, 2025
+      endISO: '2025-09-10T00:00:00.000Z',   // Sep 10, 2025 (exclusive, so effectively Sep 9 end of day)
     },
   };
 }
@@ -46,6 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const base = process.env.ROOBET_BASE_URL!;
     const token = process.env.ROOBET_BEARER!;
     const userId = process.env.ROOBET_USER_ID!;
+
     if (!base || !token || !userId) throw new Error('Missing env vars');
 
     const { current, previous } = getPeriods();
@@ -83,6 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         rank++;
       }
+
       return top.length;
     }
 
