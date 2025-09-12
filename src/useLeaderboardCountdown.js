@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 // Determine the current and previous 14-day periods
 export function getPeriods() {
   // Anchor start of cycle (adjust if needed)
-  const anchorStartUTC = Date.UTC(2025, 7, 26, 0, 0, 0); // Aug 26, 2025 (month is 0-based)
+  const anchorStartUTC = Date.UTC(2025, 8, 10, 0, 0, 0); // Sep 10, 2025 (month is 0-based)
   const PERIOD_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 
   const now = new Date();
