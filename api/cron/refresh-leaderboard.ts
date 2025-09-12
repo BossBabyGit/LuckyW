@@ -5,12 +5,12 @@ import { ensureSchema, upsertEntry } from '../../lib/db';
 function getPeriods() {
   return {
     current: {
-      startISO: '2025-09-10T00:00:00.000Z', // Sep 10, 2025
-      endISO: '2025-09-25T00:00:00.000Z',   // Sep 25, 2025 (exclusive, so effectively Sep 24 end of day)
+      startISO: '2025-09-10T00:00:00.000Z',
+      endISO:   '2025-09-25T00:00:00.000Z',
     },
     previous: {
-      startISO: '2025-08-26T00:00:00.000Z', // Aug 26, 2025
-      endISO: '2025-09-10T00:00:00.000Z',   // Sep 10, 2025 (exclusive, so effectively Sep 9 end of day)
+      startISO: '2025-08-26T00:00:00.000Z',
+      endISO:   '2025-09-10T00:00:00.000Z',
     },
   };
 }
@@ -21,19 +21,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     await ensureSchema();
 
-    const base = process.env.ROOBET_BASE_URL!;
-    const token = process.env.ROOBET_BEARER!;
+    const base   = process.env.ROOBET_BASE_URL!;
+    const token  = process.env.ROOBET_BEARER!;
     const userId = process.env.ROOBET_USER_ID!;
-
     if (!base || !token || !userId) throw new Error('Missing env vars');
 
     const { current, previous } = getPeriods();
+
+    // Only slots + provably fair (explicitly exclude dice to be safe)
+    const CATEGORY_FILTER = 'slots,provably fair,-dice';
 
     async function fetchAndSave(range: { startISO: string; endISO: string }) {
       const url = new URL('/affiliate/v2/stats', base);
       url.searchParams.set('userId', userId);
       url.searchParams.set('startDate', range.startISO);
       url.searchParams.set('endDate', range.endISO);
+      url.searchParams.set('categories', CATEGORY_FILTER);
 
       const r = await fetch(url.toString(), {
         headers: { Authorization: `Bearer ${token}` },
@@ -44,7 +47,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         throw new Error(`Upstream error: ${t}`);
       }
 
-      const data: Array<{ uid: string; username: string; wagered: number; weightedWagered: number }> = await r.json();
+      type Row = {
+        uid: string;
+        username: string;
+        wagered: number;
+        weightedWagered: number;
+      };
+
+      const data: Row[] = await r.json();
 
       const top = (data ?? [])
         .sort((a, b) => (b.weightedWagered || 0) - (a.weightedWagered || 0))
@@ -57,7 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           period_end: range.endISO,
           uid: row.uid,
           username: row.username,
-          wagered: Number(row.weightedWagered || 0),
+          wagered: Number(row.weightedWagered || 0), // uses weighted for leaderboard
           rank,
         });
         rank++;
