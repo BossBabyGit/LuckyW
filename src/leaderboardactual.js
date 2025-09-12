@@ -49,9 +49,34 @@ export default function LeaderboardPage() {
       <section className="relative py-12 md:py-16 px-6 flex-1">
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 items-end">
-            <PodiumCard placement={2} item={top3[1]} className="sm:order-1" height="h-56" tint="rgba(165, 243, 252, 0.12)" edgeColor="#67e8f9" badge={<MedalRibbon n={2} color="#67e8f9"/>} />
-            <PodiumCard placement={1} item={top3[0]} className="sm:order-2" height="h-64" tint="rgba(0,231,1,0.14)" edgeColor={KICK_GREEN} badge={<Crown className="drop-shadow" size={22} color={KICK_GREEN}/>} highlight />
-            <PodiumCard placement={3} item={top3[2]} className="sm:order-3" height="h-48" tint="rgba(250, 204, 21, 0.10)" edgeColor="#fde047" badge={<MedalRibbon n={3} color="#fde047"/>} />
+            <PodiumCard
+              placement={1}
+              item={top3[0]}
+              className="sm:order-2"
+              height="h-64"
+              tint="rgba(0,231,1,0.14)"
+              edgeColor={KICK_GREEN}
+              badge={<Crown className="drop-shadow" size={22} color={KICK_GREEN} />}
+              highlight
+            />
+            <PodiumCard
+              placement={2}
+              item={top3[1]}
+              className="sm:order-1"
+              height="h-56"
+              tint="rgba(165, 243, 252, 0.12)"
+              edgeColor="#67e8f9"
+              badge={<MedalRibbon n={2} color="#67e8f9" />}
+            />
+            <PodiumCard
+              placement={3}
+              item={top3[2]}
+              className="sm:order-3"
+              height="h-48"
+              tint="rgba(250, 204, 21, 0.10)"
+              edgeColor="#fde047"
+              badge={<MedalRibbon n={3} color="#fde047" />}
+            />
           </div>
         </div>
       </section>
@@ -202,11 +227,15 @@ function PodiumCard({ placement, item, className, height, tint, edgeColor, badge
   );
 }
 
-function MedalRibbon({ n, color }){
+function MedalRibbon({ n, color }) {
+  const suffix = n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
   return (
     <div className="flex items-center gap-1">
       <Medal size={16} color={color} />
-      <span className="text-xs" style={{color}}>{n}nd</span>
+      <span className="text-xs" style={{ color }}>
+        {n}
+        {suffix}
+      </span>
     </div>
   );
 }
