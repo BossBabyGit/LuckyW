@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ChevronDown, Sparkles, Gift, Trophy, ShieldCheck, Twitter, MessageCircle, Play, Copy, ExternalLink, Crown, Medal, Timer, Users } from "lucide-react";
+import { ChevronDown, Sparkles, Gift, Trophy, ShieldCheck, Twitter, MessageCircle, Play, Copy, ExternalLink, Crown, Medal, Timer, Users, Instagram } from "lucide-react";
 import useLeaderboardCountdown from "./useLeaderboardCountdown";
 
 // —— Brand Tokens ——
@@ -155,6 +155,26 @@ function Navbar() {
           <li>{link("/leaderboards", "Leaderboards")}</li>
           <li>{link("/rules", "Rules")}</li>
         </ul>
+        <div className="hidden md:flex items-center gap-4 text-gray-300">
+          <a
+            href="https://discord.gg/KHtScrYR"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Discord"
+            className="hover:text-white"
+          >
+            <MessageCircle size={20} />
+          </a>
+          <a
+            href="https://www.instagram.com/kickluckyw?igsh=MWF0bTBzbXMxYjM4aA%3D%3D&utm_source=qr"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            className="hover:text-white"
+          >
+            <Instagram size={20} />
+          </a>
+        </div>
         <button aria-label="menu" className="md:hidden border rounded-xl px-3 py-2 text-sm" style={{ borderColor: KICK_GREEN, color: KICK_GREEN }} onClick={() => setOpen((v) => !v)}>
           Menu
         </button>
@@ -165,6 +185,26 @@ function Navbar() {
           {link("/bonuses", "Bonuses")}
           {link("/leaderboards", "Leaderboards")}
           {link("/rules", "Rules")}
+          <div className="flex gap-4 pt-2 text-gray-300">
+            <a
+              href="https://discord.gg/KHtScrYR"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Discord"
+              className="hover:text-white"
+            >
+              <MessageCircle size={20} />
+            </a>
+            <a
+              href="https://www.instagram.com/kickluckyw?igsh=MWF0bTBzbXMxYjM4aA%3D%3D&utm_source=qr"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="hover:text-white"
+            >
+              <Instagram size={20} />
+            </a>
+          </div>
         </div>
       )}
     </nav>
