@@ -44,10 +44,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         throw new Error(`Upstream error: ${t}`);
       }
 
-      const data: Array<{ uid: string; username: string; wagered: number }> = await r.json();
+      const data: Array<{ uid: string; username: string; wagered: number; weightedWagered: number }> = await r.json();
 
       const top = (data ?? [])
-        .sort((a, b) => b.wagered - a.wagered)
+        .sort((a, b) => (b.weightedWagered || 0) - (a.weightedWagered || 0))
         .slice(0, 15);
 
       let rank = 1;
@@ -57,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           period_end: range.endISO,
           uid: row.uid,
           username: row.username,
-          wagered: Number(row.wagered || 0),
+          wagered: Number(row.weightedWagered || 0),
           rank,
         });
         rank++;
