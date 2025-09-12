@@ -625,25 +625,13 @@ function LeaderboardsPage() {
               </button>
             </header>
 
-            {/* Podium (exact 2 / 1 / 3 layout preserved) */}
+            {/* Podium (1 / 2 / 3 on mobile, 2 / 1 / 3 on desktop) */}
             <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-4">
-              {top3[1] && (
-                <PodiumCard
-                  placement={2}
-                  item={top3[1]}
-                  className=""
-                  height="h-[220px]"
-                  tint="rgba(0, 255, 255, 0.10)"
-                  edgeColor="#22d3ee"
-                  badge={<MedalRibbon n={2} color="#22d3ee" />}
-                  highlight={false}
-                />
-              )}
               {top3[0] && (
                 <PodiumCard
                   placement={1}
                   item={top3[0]}
-                  className=""
+                  className="md:order-2"
                   height="h-[260px]"
                   tint="rgba(0,231,1,0.12)"
                   edgeColor={KICK_GREEN}
@@ -651,11 +639,23 @@ function LeaderboardsPage() {
                   highlight
                 />
               )}
+              {top3[1] && (
+                <PodiumCard
+                  placement={2}
+                  item={top3[1]}
+                  className="md:order-1"
+                  height="h-[220px]"
+                  tint="rgba(0, 255, 255, 0.10)"
+                  edgeColor="#22d3ee"
+                  badge={<MedalRibbon n={2} color="#22d3ee" />}
+                  highlight={false}
+                />
+              )}
               {top3[2] && (
                 <PodiumCard
                   placement={3}
                   item={top3[2]}
-                  className=""
+                  className="md:order-3"
                   height="h-[200px]"
                   tint="rgba(250,204,21,0.10)"
                   edgeColor="#facc15"
@@ -777,10 +777,14 @@ function PodiumCard({ placement, item, className, height, tint, edgeColor, badge
 }
 
 function MedalRibbon({ n, color }) {
+  const suffix = n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
   return (
     <div className="flex items-center gap-1">
       <Medal size={16} color={color} />
-      <span className="text-xs" style={{ color }}>{n}nd</span>
+      <span className="text-xs" style={{ color }}>
+        {n}
+        {suffix}
+      </span>
     </div>
   );
 }
