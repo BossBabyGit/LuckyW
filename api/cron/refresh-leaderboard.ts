@@ -5,7 +5,7 @@ import { ensureSchema, upsertEntry } from '../../lib/db';
 function getPeriods() {
   return {
     current: {
-      startISO: '2025-09-26T00:00:00.000Z',
+      startISO: '2025-09-25T00:00:00.000Z',
       endISO:   '2025-10-10T00:00:00.000Z',
     },
     previous: {
